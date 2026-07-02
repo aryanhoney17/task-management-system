@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+.env
+*.log
+.DS_Store
+thumbs.db
+Task_Manager_Learning_Guide.pdf
