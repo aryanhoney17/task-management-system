@@ -199,16 +199,17 @@ const deleteTask = async (req, res, next) => {
 const getTaskStats = async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      `SELECT
-         COUNT(*) AS total,
-         SUM(status = 'pending') AS pending,
-         SUM(status = 'in_progress') AS in_progress,
-         SUM(status = 'completed') AS completed,
-         SUM(priority = 'high') AS high_priority,
-         SUM(due_date < CURDATE() AND status != 'completed') AS overdue
-       FROM tasks WHERE user_id = ?`,
-      [req.user.id]
-    );
+  `SELECT
+      COUNT(*) AS total,
+      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+      SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress,
+      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
+      SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) AS high_tasks,
+      SUM(CASE WHEN due_date < CURDATE() AND status <> 'completed' THEN 1 ELSE 0 END) AS overdue
+   FROM tasks
+   WHERE user_id = ?`,
+  [req.user.id]
+);
     res.json({ success: true, data: rows[0] });
   } catch (err) {
     next(err);
